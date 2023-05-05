@@ -345,3 +345,41 @@ func (h *Handler) DeleteOrderItem(c *gin.Context) {
 
 	h.handlerResponse(c, "delete order", http.StatusNoContent, "Deleted succesfully")
 }
+
+// -------------------------------------------------------------------------------------------
+
+func (h *Handler) TotalSum(c *gin.Context) {
+	var GetTotal models.Discounter
+
+	err := c.ShouldBindJSON(&GetTotal)
+	if err != nil {
+		h.handlerResponse(c, "get order", http.StatusBadRequest, err.Error())
+		return
+	}
+
+	total, err := h.storages.Order().TotalSumma(context.Background(), &GetTotal)
+	if err != nil {
+		h.handlerResponse(c, "storage.order.create", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	h.handlerResponse(c, "get order", http.StatusCreated, total)
+}
+
+func (h *Handler) FinderItem(c *gin.Context) {
+	var finder models.NewFinder
+
+	err := c.ShouldBindJSON(&finder)
+	if err != nil {
+		h.handlerResponse(c, "get order", http.StatusBadRequest, err.Error())
+		return
+	}
+
+	items, err := h.storages.Order().Finder(context.Background(), &finder)
+	if err != nil {
+		h.handlerResponse(c, "storage.order.create", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	h.handlerResponse(c, "get order", http.StatusCreated, items)
+}

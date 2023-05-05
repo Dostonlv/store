@@ -37,9 +37,11 @@ func NewApi(r *gin.Engine, cfg *config.Config, store storage.StorageI, logger lo
 	r.DELETE("/product/:id", handler.DeleteProduct)
 
 	// stock api  -- not ready for using
+	//task 1
 	r.PUT("/stock/transfer", handler.StockTransfer)
 	r.POST("/stock", handler.CreateStock)
-	r.GET("view/:time", handler.GetListStaffSold)
+	//task 2
+	r.GET("/view/:time", handler.GetListStaffSold)
 	r.GET("/stock/:id", handler.GetByIdStock)
 	r.GET("/stock", handler.GetListStock)
 	r.PUT("/stock/:id", handler.UpdateStock)
@@ -77,11 +79,18 @@ func NewApi(r *gin.Engine, cfg *config.Config, store storage.StorageI, logger lo
 	r.PATCH("/order/:id", handler.UpdatePatchOrder)
 	r.DELETE("/order/:id", handler.DeleteOrder)
 	r.POST("/order_item/", handler.CreateOrderItem)
+	// task 5
+	r.POST("/finder", handler.FinderItem)
 	r.DELETE("/order_item/:id", handler.DeleteOrderItem)
+	// task 4
+	r.POST("/totalsum", handler.TotalSum)
 
-	// promo api
+	// promo api task 3
 	r.POST("/promo", handler.CreatePromo)
-
+	r.GET("/promo/:id", handler.GetPromoByID)
+	r.GET("/promo", handler.GetListPromo)
+	//r.PUT("/promo/:id", handler.UpdatePromo)
+	r.DELETE("/promo/:id", handler.DeletePromo)
 	url := ginSwagger.URL("swagger/doc.json") // The url pointing to API definition
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 }

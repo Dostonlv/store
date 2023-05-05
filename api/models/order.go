@@ -76,3 +76,21 @@ type CreateOrderItem struct {
 	ListPrice float64 `json:"list_price"`
 	Discount  float64 `json:"discount"`
 }
+
+type Discounter struct {
+	OrderID   int    `json:"order_id"`
+	PromoCode string `json:"promo_code"`
+}
+
+type TotalSumma struct {
+	TotalSumma float64 `json:"total_summa"`
+}
+
+type NewFinder struct {
+	OrderID   int     `json:"order_id"`
+	ProductID int     `json:"product_id"`
+	Quantity  int     `json:"quantity"`
+	ListPrice float64 `json:"list_price"`
+	Discount  float64 `json:"discount"`
+	StoreID   int     `json:"store_id"`
+}

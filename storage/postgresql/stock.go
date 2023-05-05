@@ -9,7 +9,6 @@ import (
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/lib/pq"
-	"time"
 )
 
 type stockRepo struct {
@@ -238,57 +237,4 @@ WHERE store_id = $2 AND product_id = $3 ;`
 	result, err = r.db.Exec(ctx, query, req.Quantity, req.StoreIdTo, req.ProductId)
 
 	return result.RowsAffected(), nil
-}
-
-func (r *stockRepo) GetListStaffSold(ctx context.Context, req *models.GetListStaffSoldRequest) (resp *models.GetListStaffSoldResponse, err error) {
-	resp = &models.GetListStaffSoldResponse{}
-	query := `
-		SELECT staffs.first_name || ' ' || staffs.last_name AS "Сотурник",
-       categories.category_name AS "Категория",
-       products.product_name AS "Продукт",
-       order_items.quantity AS "Количество",
-       order_items.list_price * order_items.quantity AS "Общая Цена"
-FROM orders
-         JOIN order_items ON orders.order_id = order_items.order_id
-         JOIN products ON order_items.product_id = products.product_id
-         JOIN categories ON products.category_id = categories.category_id
-         JOIN staffs ON orders.staff_id = staffs.staff_id
-WHERE orders.order_date = $1;
-`
-	if req.Date == "" {
-		req.Date = time.Now().Format("2006-01-02")
-		return
-	}
-	date, err := time.Parse("2006-01-02", req.Date)
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.db.Query(ctx, query, date)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-
-		var (
-			sold models.GetStaffSoldResponse
-		)
-
-		err = rows.Scan(
-			&sold.FirstName,
-			&sold.Category,
-			&sold.Product,
-			&sold.Quantity,
-			&sold.Total,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		resp.Staffs = append(resp.Staffs, &sold)
-	}
-	return resp, nil
-
 }

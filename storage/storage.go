@@ -85,8 +85,10 @@ type OrderRepoI interface {
 	GetList(ctx context.Context, req *models.GetListOrderRequest) (resp *models.GetListOrderResponse, err error)
 	Update(ctx context.Context, req *models.UpdateOrder) (int64, error)
 	UpdatePatch(ctx context.Context, req *models.PatchRequest) (int64, error)
+	Finder(ctx context.Context, req *models.NewFinder) (int, error)
 	Delete(ctx context.Context, req *models.OrderPrimaryKey) (int64, error)
 	AddOrderItem(ctx context.Context, req *models.CreateOrderItem) error
+	TotalSumma(ctx context.Context, req *models.Discounter) (resp *models.TotalSumma, err error)
 	RemoveOrderItem(ctx context.Context, req *models.OrderItemPrimaryKey) error
 }
 
@@ -94,6 +96,6 @@ type PromoCodeRepoI interface {
 	Create(ctx context.Context, req *models.CreatePromoCode) (int, error)
 	GetByID(ctx context.Context, req *models.PromoCodePrimaryKey) (*models.PromoCode, error)
 	GetList(ctx context.Context, req *models.GetListPromoCodeRequest) (resp *models.GetListPromoCodeResponse, err error)
-	Update(ctx context.Context, req *models.UpdatePromoCode) (int64, error)
+	//Update(ctx context.Context, req *models.UpdatePromoCode) (int64, error)
 	Delete(ctx context.Context, req *models.PromoCodePrimaryKey) (int64, error)
 }

@@ -469,3 +469,78 @@ func (r *orderRepo) RemoveOrderItem(ctx context.Context, req *models.OrderItemPr
 
 	return nil
 }
+
+func (r *orderRepo) TotalSumma(ctx context.Context, req *models.Discounter) (resp *models.TotalSumma, err error) {
+	query := `
+select
+    (select sum(quantity*list_price) from order_items group by order_id having order_id=$1)
+        -
+    (SELECT COALESCE((select CASE discount_type
+          WHEN  'fixed' THEN discount
+        WHEN 'percentage' THEN (select sum(quantity*list_price)
+       from order_items group by order_id having order_id=$1) * (discount)
+       end
+    from promo_codes where order_limit_price < (select sum(quantity*list_price)
+    from order_items group by order_id having order_id=$1)
+    AND promo_codes.name = $2),0)) as price;
+`
+	var totalSumma float64
+
+	err = r.db.QueryRow(ctx, query, req.OrderID, req.PromoCode).Scan(&totalSumma)
+	if err != nil {
+		return nil, err
+	}
+
+	resp = &models.TotalSumma{
+		TotalSumma: totalSumma,
+	}
+	return resp, nil
+
+}
+
+func (r *orderRepo) Finder(ctx context.Context, req *models.NewFinder) (int, error) {
+
+	var currentQuantity int
+	err := r.db.QueryRow(ctx, "SELECT quantity FROM stocks WHERE product_id = $1", req.ProductID).Scan(&currentQuantity)
+	if err != nil {
+		return 0, err
+	}
+	if currentQuantity < req.Quantity {
+		return 0, errors.New("not enough quantity in stock")
+	}
+
+	query := `
+			INSERT INTO order_items(
+			order_id, 
+			item_id, 
+			product_id,
+			quantity,
+			list_price,
+			discount
+		)
+		VALUES (
+			$1, 
+			(
+				SELECT COALESCE(MAX(item_id), 0) + 1 FROM order_items WHERE order_id = $1
+			),
+			$2, $3, $4, $5)
+	`
+
+	_, err = r.db.Exec(ctx, query,
+		req.OrderID,
+		req.ProductID,
+		req.Quantity,
+		req.ListPrice,
+		req.Discount,
+	)
+
+	if err != nil {
+		return 0, err
+	}
+	_, err = r.db.Exec(ctx, "UPDATE stocks SET quantity = $1 WHERE product_id = $2 and store_id = $3", currentQuantity-req.Quantity, req.ProductID, req.StoreID)
+	if err != nil {
+		return 0, err
+	}
+
+	return 0, err
+}

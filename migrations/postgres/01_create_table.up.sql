@@ -94,13 +94,19 @@ CREATE TABLE stocks (
 	FOREIGN KEY (product_id) REFERENCES products (product_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+
+
+
+create type discount_type as enum('fixed','percentage');
+
 CREATE TABLE promo_codes (
-    promo_code_id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    discount DECIMAL(10, 2) NOT NULL,
-    discount_type VARCHAR(10) NOT NULL,
-    order_limit_price DECIMAL(10, 2) NOT NULL
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    discount Numeric(10,2) NOT NULL,
+    discount_type discount_type NOT NULL,
+    order_limit_price Numeric(10,2) NOT NULL
 );
+
 
 
 
